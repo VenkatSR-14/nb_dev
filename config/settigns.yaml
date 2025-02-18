@@ -1,0 +1,1 @@
+DATABASE_URL: "postgresql://postgres:Venk@t1998@localhost:5432/nutribuddy"
