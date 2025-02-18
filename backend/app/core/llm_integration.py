@@ -1,7 +1,7 @@
 import openai
 import pandas as pd
 from typing import List, Dict
-from config import settings
+from app.core.config import settings
 
 # Load OpenAI API Key
 openai.api_key = settings.OPENAI_API_KEY
@@ -12,9 +12,8 @@ USER_PROFILES_PATH = "data/cleaned/cleaned_user_profiles.csv"
 
 # Load valid diseases from the user profile dataset
 user_profiles = pd.read_csv(USER_PROFILES_PATH)
-valid_diseases = set()  # Store all valid diseases
+valid_diseases = set()
 
-# Extract diseases from CSV and clean them
 for diseases in user_profiles["Disease"].dropna():
     for disease in diseases.split():
         valid_diseases.add(disease.strip())
@@ -24,7 +23,7 @@ def parse_disease_history(history: str) -> List[str]:
     Uses GPT-3.5-Turbo to extract diseases ONLY from the preprocessed user profile dataset.
     Returns a list of extracted diseases.
     """
-    valid_diseases_str = ", ".join(valid_diseases)  # Convert set to a string
+    valid_diseases_str = ", ".join(valid_diseases)
 
     prompt = (
         f"Extract diseases from the following medical history:\n\n{history}\n\n"
@@ -33,15 +32,15 @@ def parse_disease_history(history: str) -> List[str]:
     )
 
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",  # ✅ Using a cheaper, optimized model
+        client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)  # ✅ New OpenAI API client
+        response = client.chat.completions.create(  # ✅ Updated API call
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a medical expert."},
                 {"role": "user", "content": prompt}
             ]
         )
-        diseases = response["choices"][0]["message"]["content"]
-        # Ensure only valid diseases are kept
+        diseases = response.choices[0].message.content.strip()
         return [d.strip() for d in diseases.split(",") if d.strip() in valid_diseases]
     except Exception as e:
         print("Error calling OpenAI:", e)

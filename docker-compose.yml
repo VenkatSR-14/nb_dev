@@ -37,7 +37,7 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: "postgresql://postgres:Venk@t1998@postgres_db:5432/nutribuddy"
-      OPENAI_API_KEY: "your_openai_api_key_here"
+      OPENAI_API_KEY: ""
     ports:
       - "8000:8000"
     depends_on:

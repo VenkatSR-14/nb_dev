@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from models.llm_parsed import DiseaseHistoryRequest, ParsedDiseaseResponse
-from services.llm_service import LLMService
+from app.models.llm_parsed import DiseaseHistoryRequest, ParsedDiseaseResponse
+from app.services.llm_service import LLMService
 
 router = APIRouter()
 

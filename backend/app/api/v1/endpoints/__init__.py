@@ -1,9 +1,9 @@
-# app/api/v1/__init__.py
-
 from fastapi import APIRouter
-from app.api.v1.endpoints.users import router as users_router  # ✅ Import user routes (or any other routes)
+from app.api.v1.endpoints.users import router as users_router
+from app.api.v1.endpoints.llm import router as llm_router  # ✅ Import LLM routes
 
 api_router = APIRouter()
 
-# Include different route modules
-api_router.include_router(users_router, prefix="/users", tags=["Users"])  # ✅ Register users routes
+# ✅ Register routes
+api_router.include_router(users_router, prefix="/users", tags=["Users"])
+api_router.include_router(llm_router, prefix="/llm", tags=["LLM"])  # ✅ Ensure this is included
