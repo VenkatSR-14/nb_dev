@@ -1,6 +1,6 @@
-import axios from "axios";
 import { useState } from "react";
-
+import axios from "axios";
+import { Container, TextField, Button, Typography, Paper } from "@mui/material";
 
 const UpdateSettings = () => {
     const [history, setHistory] = useState("");
@@ -11,13 +11,13 @@ const UpdateSettings = () => {
         e.preventDefault();
         const token = localStorage.getItem("token");
 
-        try{
+        try {
             await axios.put("http://localhost:8000/auth/update", {
                 history,
                 height: Number(height),
                 weight: Number(weight),
             }, {
-                headers: {Authorization:"Bearer ${token}"}
+                headers: {Authorization: `Bearer ${token}`}
             });
             alert("Profile updated successfully!");
         } catch(error){
@@ -26,20 +26,23 @@ const UpdateSettings = () => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-          <form onSubmit={handleUpdate} className="p-6 shadow-lg rounded-lg bg-white w-96">
-            <h2 className="text-xl font-bold mb-4">Update Profile</h2>
-            <textarea placeholder="Update history" className="p-2 border rounded mb-2 w-full"
-              onChange={(e) => setHistory(e.target.value)} required />
-            <input type="number" placeholder="Height (cm)" className="p-2 border rounded mb-2 w-full"
-              onChange={(e) => setHeight(e.target.value)} required />
-            <input type="number" placeholder="Weight (kg)" className="p-2 border rounded mb-2 w-full"
-              onChange={(e) => setWeight(e.target.value)} required />
-            <button type="submit" className="p-2 bg-yellow-500 text-white rounded w-full">Update</button>
-          </form>
-        </div>
-      );
+        <Container component="main" maxWidth="xs">
+            <Paper elevation={3} style={{ padding: "20px", marginTop: "50px" }}>
+                <Typography variant="h5" align="center">
+                    Update Profile
+                </Typography>
+                <form onSubmit={handleUpdate}>
+                    <TextField fullWidth label="Update History" multiline rows={4} margin="normal" onChange={(e) => setHistory(e.target.value)} required />
+                    <TextField fullWidth label="Height (cm)" type="number" margin="normal" onChange={(e) => setHeight(e.target.value)} required />
+                    <TextField fullWidth label="Weight (kg)" type="number" margin="normal" onChange={(e) => setWeight(e.target.value)} required />
+
+                    <Button fullWidth type="submit" variant="contained" color="secondary" style={{ marginTop: "10px" }}>
+                        Update
+                    </Button>
+                </form>
+            </Paper>
+        </Container>
+    );
 }
 
 export default UpdateSettings;
-
