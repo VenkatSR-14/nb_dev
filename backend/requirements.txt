@@ -5,7 +5,8 @@ psycopg2-binary
 pydantic==2.5.3
 pydantic-settings==2.0.3
 python-dotenv
-openai==1.3.5
+httpx==0.27.2  # ✅ Fix OpenAI API conflict
+openai==1.3.5  # ✅ Use latest stable version
 passlib[bcrypt]
 python-jose
 pandas
