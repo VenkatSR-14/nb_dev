@@ -1,0 +1,101 @@
+User_Id,Age,Gender,Preferred Intensity,Fitness Goal,Preferred Duration
+1,47,Female,4,Endurance,69
+2,67,Male,1,Weight Loss,43
+3,31,Female,6,Muscle Gain,19
+4,58,Male,2,Endurance,76
+5,48,Female,3,Weight Loss,50
+6,25,Male,3,Weight Loss,73
+7,66,Male,1,Weight Loss,21
+8,53,Female,5,Weight Loss,89
+9,48,Female,9,Endurance,18
+10,46,Female,7,Weight Loss,58
+11,48,Female,6,Weight Loss,50
+12,21,Male,9,Muscle Gain,37
+13,35,Male,3,Muscle Gain,45
+14,39,Male,2,Weight Loss,86
+15,24,Female,1,Endurance,58
+16,55,Male,9,Endurance,43
+17,22,Female,1,Endurance,58
+18,44,Female,6,Weight Loss,40
+19,24,Male,1,Weight Loss,57
+20,26,Male,6,Weight Loss,50
+21,55,Male,7,Weight Loss,57
+22,62,Female,8,Weight Loss,44
+23,42,Male,4,Weight Loss,18
+24,55,Male,1,Muscle Gain,66
+25,58,Male,5,Weight Loss,58
+26,65,Male,6,Weight Loss,57
+27,52,Female,2,Weight Loss,44
+28,49,Female,6,Weight Loss,17
+29,40,Male,6,Muscle Gain,26
+30,64,Female,4,Weight Loss,28
+31,33,Female,4,Endurance,88
+32,34,Female,6,Weight Loss,66
+33,49,Male,2,Weight Loss,54
+34,46,Male,9,Muscle Gain,38
+35,61,Female,9,Weight Loss,76
+36,26,Male,8,Muscle Gain,59
+37,64,Male,1,Weight Loss,48
+38,36,Male,5,Muscle Gain,51
+39,41,Female,4,Weight Loss,19
+40,44,Male,2,Muscle Gain,83
+41,35,Male,9,Muscle Gain,38
+42,50,Male,1,Muscle Gain,19
+43,42,Male,3,Endurance,35
+44,39,Male,6,Weight Loss,70
+45,54,Female,9,Muscle Gain,32
+46,49,Female,3,Endurance,16
+47,67,Female,8,Muscle Gain,58
+48,64,Male,4,Endurance,22
+49,37,Male,2,Endurance,61
+50,27,Female,9,Endurance,42
+51,59,Female,5,Endurance,89
+52,29,Female,1,Muscle Gain,81
+53,47,Female,1,Endurance,79
+54,21,Male,7,Weight Loss,55
+55,57,Female,3,Muscle Gain,78
+56,48,Male,9,Muscle Gain,67
+57,36,Male,1,Endurance,85
+58,63,Female,4,Weight Loss,25
+59,23,Female,6,Muscle Gain,16
+60,35,Female,3,Muscle Gain,52
+61,57,Male,2,Endurance,36
+62,55,Male,8,Weight Loss,83
+63,35,Female,2,Muscle Gain,30
+64,23,Male,4,Muscle Gain,89
+65,41,Male,2,Weight Loss,20
+66,24,Female,5,Endurance,47
+67,19,Male,6,Endurance,59
+68,44,Male,7,Muscle Gain,37
+69,35,Male,7,Endurance,66
+70,47,Female,5,Endurance,48
+71,30,Female,1,Endurance,66
+72,69,Male,8,Weight Loss,49
+73,19,Male,4,Endurance,32
+74,69,Male,8,Muscle Gain,86
+75,30,Male,1,Muscle Gain,22
+76,33,Female,9,Weight Loss,62
+77,61,Female,1,Muscle Gain,43
+78,40,Male,6,Endurance,27
+79,30,Female,8,Muscle Gain,48
+80,28,Female,7,Muscle Gain,21
+81,20,Male,9,Weight Loss,66
+82,59,Female,3,Muscle Gain,44
+83,41,Male,5,Endurance,73
+84,61,Female,7,Weight Loss,65
+85,35,Female,4,Muscle Gain,31
+86,61,Male,2,Weight Loss,84
+87,59,Male,5,Endurance,27
+88,50,Female,2,Muscle Gain,43
+89,42,Female,4,Weight Loss,47
+90,60,Female,1,Endurance,16
+91,33,Male,8,Weight Loss,61
+92,65,Female,8,Muscle Gain,69
+93,45,Female,5,Muscle Gain,63
+94,37,Male,8,Muscle Gain,21
+95,63,Male,9,Endurance,74
+96,23,Male,1,Weight Loss,48
+97,40,Male,5,Endurance,39
+98,30,Female,2,Endurance,47
+99,43,Female,4,Endurance,46
+100,20,Male,8,Weight Loss,39

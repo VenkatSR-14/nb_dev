@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "Venk@t1998"
+      POSTGRES_DB: nutribuddy
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persistent storage for DB
+
+      - ./database/init.sql:/docker-entrypoint-initdb.d/1_init.sql
+      - ./database/load_data.sql:/docker-entrypoint-initdb.d/2_load_data.sql
+      - ./data:/docker-entrypoint-initdb.d/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+      timeout: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+
+volumes:
+  postgres_data:
+
+networks:
+  backend:
