@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from models.user import User
-from core.security import hash_password  # Assume you have password hashing function
+from app.models.user import User
+from app.core.security import hash_password  # Assume you have password hashing function
 
 def create_user(db: Session, username: str, password: str, email: str, veg_non: bool, height: float, weight: float, disease: str, diet: str):
     """

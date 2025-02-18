@@ -1,4 +1,4 @@
-from core.llm_integration import parse_disease_and_recommend_diet
+from app.core.llm_integration import parse_disease_and_recommend_diet
 from typing import Dict
 
 class LLMService:

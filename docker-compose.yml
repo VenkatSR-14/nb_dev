@@ -13,7 +13,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data  # Persistent storage for DB
-
       - ./database/init.sql:/docker-entrypoint-initdb.d/1_init.sql
       - ./database/load_data.sql:/docker-entrypoint-initdb.d/2_load_data.sql
       - ./data:/docker-entrypoint-initdb.d/data
@@ -29,6 +28,26 @@ services:
       driver: "json-file"
       options:
         max-size: "10m"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nutribuddy_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: "postgresql://postgres:Venk@t1998@postgres_db:5432/nutribuddy"
+      OPENAI_API_KEY: "your_openai_api_key_here"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+    volumes:
+      - ./data:/app/data  # ✅ Keep only CSV data mounted to avoid overwriting backend files
+
 
 volumes:
   postgres_data:
