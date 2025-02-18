@@ -2,6 +2,7 @@ import openai
 import pandas as pd
 from typing import List, Dict, Optional
 from app.core.config import settings
+import ast
 
 # ✅ Initialize OpenAI client (New API format)
 client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
@@ -71,10 +72,17 @@ def recommend_diet(diseases: List[str]) -> str:
 
     for disease in diseases:
         matching_rows = disease_diet_map[disease_diet_map["Disease"].str.contains(disease, case=False, na=False)]
-        matched_diets.update(matching_rows["Diet"].tolist())
-
+    
+        for diet_list in matching_rows["Diet"]:
+            # Convert the string representation of a list into an actual Python list
+            parsed_diets = ast.literal_eval(diet_list) if isinstance(diet_list, str) else diet_list
+            matched_diets.update(parsed_diets)  # Add individual diets to the set
+        
     if matched_diets:
-        return ", ".join(matched_diets)
+        
+        unique_diets = sorted(matched_diets)
+
+        return ", ".join(unique_diets)
 
     # If no predefined diet is found, ask GPT-3.5-Turbo for a recommendation
     llm_prompt = f"Suggest a suitable diet for someone with the following condition(s): {', '.join(diseases)}."
