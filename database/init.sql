@@ -5,6 +5,7 @@ DROP TABLE IF EXISTS exercises CASCADE;
 DROP TABLE IF EXISTS meals CASCADE;
 DROP TABLE IF EXISTS exercise_user_profiles CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS user_mapping CASCADE;
 
 -- Recreate Users Table (Handles authentication & user profile)
 CREATE TABLE IF NOT EXISTS users (
@@ -18,8 +19,26 @@ CREATE TABLE IF NOT EXISTS users (
     bmi FLOAT GENERATED ALWAYS AS (weight / ((height / 100) * (height / 100))) STORED,
     nutrient VARCHAR(100),
     disease TEXT,
-    diet TEXT
+    diet TEXT,
+    gender BOOLEAN
 );
+CREATE TABLE IF NOT EXISTS users (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(255) UNIQUE,
+    password_hash TEXT,
+    email VARCHAR(255) UNIQUE,
+    veg_non BOOLEAN,
+    height FLOAT,
+    weight FLOAT,
+    bmi FLOAT GENERATED ALWAYS AS (weight / ((height / 100) * (height / 100))) STORED,
+    nutrient VARCHAR(100),
+    disease TEXT,
+    diet TEXT,
+    gender BOOLEAN
+);
+
+-- ✅ Ensure sequence starts at MAX(user_id) + 1
+SELECT setval('users_user_id_seq', COALESCE((SELECT MAX(user_id) FROM users), 1), FALSE);
 
 -- Recreate Meals Table
 CREATE TABLE IF NOT EXISTS meals (
@@ -33,6 +52,12 @@ CREATE TABLE IF NOT EXISTS meals (
     diet TEXT,
     price DECIMAL(10,2)
 );
+
+CREATE TABLE IF NOT EXISTS user_mapping (
+    user_id SERIAL PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+    username VARCHAR(255) UNIQUE NOT NULL
+);
+
 
 -- Recreate Exercises Table
 CREATE TABLE IF NOT EXISTS exercises (

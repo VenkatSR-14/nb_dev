@@ -1,40 +1,57 @@
 import { useState } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
-import { Container, TextField, Button, Typography, Paper, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
+import {
+  Container,
+  TextField,
+  Button,
+  Typography,
+  Paper,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://backend:8000";
+
 
 const Signup = () => {
-  const [userName, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [history, setHistory] = useState("");
-  const [height, setHeight] = useState("");
-  const [weight, setWeight] = useState("");
-  const [vegNon, setVegNon] = useState(""); // Boolean (0 for non-veg, 1 for veg)
-  const [gender, setGender] = useState("");
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [disease, setDisease] = useState<string>("");
+  const [height, setHeight] = useState<string>("");
+  const [weight, setWeight] = useState<string>("");
+  const [vegNon, setVegNon] = useState<string>(""); // Boolean (true for veg, false for non-veg)
+  const [gender, setGender] = useState<string>("");
   const navigate = useNavigate();
 
-  const calculateBMI = (height: number, weight: number) => {
-    return (weight / ((height / 100) * (height / 100))).toFixed(2);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const bmi = calculateBMI(Number(height), Number(weight));
 
     try {
-      await axios.post("http://localhost:8000/auth/signup", {
-        userName,
+      axios.post(`${API_BASE_URL}/api/v1/auth/signup`, {
+        username,
         password,
-        history,
+        email,
+        disease,
         height: Number(height),
         weight: Number(weight),
-        bmi: Number(bmi),
-        veg_non: vegNon === "Veg",
-        gender,
+        veg_non: vegNon === "1",  // ✅ Converts "1" to true, "0" to false
+        gender: gender === "1",   // ✅ Converts "1" to true, "0" to false
       });
-      navigate("/");
+
+      alert("Signup Successful!");
+      navigate("/"); // ✅ Redirect after successful signup
     } catch (error) {
-      console.error("Signup failed", error);
+      const axiosError = error as AxiosError;
+      console.error("Signup failed", axiosError);
+      alert(
+        axiosError.response?.data
+          ? JSON.stringify(axiosError.response.data)
+          : "Signup failed. Please try again."
+      );
     }
   };
 
@@ -45,30 +62,93 @@ const Signup = () => {
           Sign Up
         </Typography>
         <form onSubmit={handleSubmit}>
-          <TextField fullWidth label="Username" margin="normal" onChange={(e) => setUsername(e.target.value)} required />
-          <TextField fullWidth label="Password" type="password" margin="normal" onChange={(e) => setPassword(e.target.value)} required />
+          <TextField
+            fullWidth
+            label="Username"
+            margin="normal"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+          <TextField
+            fullWidth
+            label="Password"
+            type="password"
+            margin="normal"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <TextField
+            fullWidth
+            label="Email"
+            type="email"
+            margin="normal"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
           <FormControl fullWidth margin="normal">
             <InputLabel>Gender</InputLabel>
-            <Select value={gender} onChange={(e) => setGender(e.target.value)} required>
-              <MenuItem value="Male">Male</MenuItem>
-              <MenuItem value="Female">Female</MenuItem>
+            <Select
+              value={gender}
+              onChange={(e) => setGender(e.target.value as string)}
+              required
+            >
+              <MenuItem value="0">Male</MenuItem>
+              <MenuItem value="1">Female</MenuItem>
             </Select>
           </FormControl>
 
           <FormControl fullWidth margin="normal">
             <InputLabel>Diet Preference</InputLabel>
-            <Select value={vegNon} onChange={(e) => setVegNon(e.target.value)} required>
-              <MenuItem value="Veg">Vegetarian</MenuItem>
-              <MenuItem value="Non-Veg">Non-Vegetarian</MenuItem>
+            <Select
+              value={vegNon}
+              onChange={(e) => setVegNon(e.target.value as string)}
+              required
+            >
+              <MenuItem value="0">Vegetarian</MenuItem>
+              <MenuItem value="1">Non-Vegetarian</MenuItem>
             </Select>
           </FormControl>
 
-          <TextField fullWidth label="Disease History" multiline rows={6} sx={{ minHeight: "120px" }} margin="normal" onChange={(e) => setHistory(e.target.value)} required />
-          <TextField fullWidth label="Height (cm)" type="number" margin="normal" onChange={(e) => setHeight(e.target.value)} required />
-          <TextField fullWidth label="Weight (kg)" type="number" margin="normal" onChange={(e) => setWeight(e.target.value)} required />
+          <TextField
+            fullWidth
+            label="Disease History"
+            multiline
+            rows={4}
+            margin="normal"
+            value={disease}
+            onChange={(e) => setDisease(e.target.value)}
+            required
+          />
+          <TextField
+            fullWidth
+            label="Height (cm)"
+            type="number"
+            margin="normal"
+            value={height}
+            onChange={(e) => setHeight(e.target.value)}
+            required
+          />
+          <TextField
+            fullWidth
+            label="Weight (kg)"
+            type="number"
+            margin="normal"
+            value={weight}
+            onChange={(e) => setWeight(e.target.value)}
+            required
+          />
 
-          <Button fullWidth type="submit" variant="contained" color="primary" style={{ marginTop: "10px" }}>
+          <Button
+            fullWidth
+            type="submit"
+            variant="contained"
+            color="primary"
+            style={{ marginTop: "10px" }}
+          >
             Sign Up
           </Button>
         </form>

@@ -12,7 +12,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data  # Persistent storage for DB
+      - postgres_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/1_init.sql
       - ./database/load_data.sql:/docker-entrypoint-initdb.d/2_load_data.sql
       - ./data:/docker-entrypoint-initdb.d/data
@@ -36,7 +36,7 @@ services:
     container_name: nutribuddy_backend
     restart: unless-stopped
     environment:
-      DATABASE_URL: "postgresql://postgres:Venk@t1998@postgres_db:5432/nutribuddy"
+      DATABASE_URL: "postgresql://postgres:Venk%40t1998@postgres_db:5432/nutribuddy"
       OPENAI_API_KEY: ""
     ports:
       - "8000:8000"
@@ -46,8 +46,30 @@ services:
     networks:
       - backend
     volumes:
-      - ./data:/app/data  # ✅ Keep only CSV data mounted to avoid overwriting backend files
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/docs || exit 1"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+      timeout: 5s
 
+  frontend:
+    build:
+      context: ./frontend/nutribuddy-client
+      dockerfile: Dockerfile
+    container_name: nutribuddy_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - backend
+    volumes:
+      - ./frontend/nutribuddy-client:/app
+      # - /app/node_modules  # ❌ Remove if causing errors
 
 volumes:
   postgres_data:

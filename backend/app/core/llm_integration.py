@@ -31,7 +31,7 @@ def parse_disease_history(history: str, img_url: Optional[str] = None) -> List[s
 
     prompt = (
         f"Extract diseases from the following medical history:\n\n{history}\n\n"
-        f"Return ONLY diseases in this list: {valid_diseases_str}.\n"
+        f"Return all the applicable diseases in this list: {valid_diseases_str}.\n"
         f"Return diseases as a comma-separated format."
     )
 
@@ -47,7 +47,7 @@ def parse_disease_history(history: str, img_url: Optional[str] = None) -> List[s
         )
 
         diseases = response.choices[0].message.content.strip()
-
+        print(diseases)
         if not diseases:
             return []  # ✅ Ensure a response is always returned
 

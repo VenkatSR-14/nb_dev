@@ -36,3 +36,5 @@ DELIMITER ',' CSV HEADER;
 COPY exercise_user_profiles(user_id, age, gender, preferred_intensity, fitness_goal, preferred_duration)
 FROM '/docker-entrypoint-initdb.d/data/cleaned/cleaned_exercise_user_profiles.csv'
 DELIMITER ',' CSV HEADER;
+
+SELECT setval('users_user_id_seq', COALESCE((SELECT MAX(user_id) FROM users), 1), FALSE);

@@ -19,6 +19,7 @@ class SignupRequest(BaseModel):
 @router.post("/signup")
 async def signup(user: SignupRequest, db: Session = Depends(get_db)):
     db_user = get_user_by_username(db, user.username)
+    print("Came here")
     if db_user:
         raise HTTPException(status_code=400, detail="Username already exists")
     
