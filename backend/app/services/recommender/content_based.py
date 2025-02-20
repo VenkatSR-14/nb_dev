@@ -18,7 +18,11 @@ def recommend_content_based(db: Session, user_id: int, top_n=5):
     preferred_diseases = user.disease   # ✅ Fetch from DB
 
     # Load meals from the database
-    meals = pd.DataFrame(db.query(Meal).all(), columns=["meal_id", "name", "nutrient", "disease", "diet"])
+    meals_query = db.query(Meal).all()
+    meals = pd.DataFrame(
+        [meal.__dict__ for meal in meals_query], 
+        columns=["meal_id", "name", "nutrient", "disease", "diet"]
+    ).drop("_sa_instance_state", axis=1, errors="ignore")  # ✅ Remove SQLAlchemy instance metadata
     
     if meals.empty:
         return {"error": "No meals found"}

@@ -25,3 +25,4 @@ class RecentActivity(Base):
     # ✅ Relationships
     user = relationship("User", back_populates="recent_activities")
     meal = relationship("Meal", back_populates="recent_activities")
+    exercise = relationship("Exercise", back_populates="recent_activities")  # ✅ Added relationship

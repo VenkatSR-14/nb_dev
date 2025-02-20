@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.services.user_service import create_user, get_user_by_username, update_user
+from app.services.user_service import create_user, get_user_by_username, update_user, login_user
 from pydantic import BaseModel
 from app.services.llm_service import LLMService
 
@@ -16,6 +16,10 @@ class SignupRequest(BaseModel):
     weight: float
     disease: str
     gender: bool  # ✅ Ensure this is included
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
 @router.post("/signup")
 async def signup(user: SignupRequest, db: Session = Depends(get_db)):
@@ -46,8 +50,17 @@ async def signup(user: SignupRequest, db: Session = Depends(get_db)):
 
     return {"message": "User created successfully", "user_id": result["user_id"]}
 
+@router.post("/login")
+async def login(user: LoginRequest, db: Session = Depends(get_db)):
+    """
+    User login endpoint that triggers recommendations.
+    """
+    result = login_user(db, user.username, user.password)
+    
+    if "error" in result:
+        raise HTTPException(status_code=401, detail=result["error"])
 
-
+    return result
 
 @router.put("/update-user/{user_id}")
 async def update_user_details(user_id: int, user: SignupRequest, db: Session = Depends(get_db)):

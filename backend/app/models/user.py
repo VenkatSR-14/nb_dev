@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, Float, Text
 from sqlalchemy.orm import relationship
 from app.core.database import Base
-
+from app.models.recommendations import Recommendation
 class User(Base):
     __tablename__ = "users"
 
@@ -21,3 +21,6 @@ class User(Base):
 
     # ✅ Relationship with RecentActivity (UserActivity table)
     recent_activities = relationship("RecentActivity", back_populates="user", cascade="all, delete-orphan")
+
+    # ✅ Relationship with Recommendations (New Fix)
+    recommendations = relationship("Recommendation", back_populates="user", cascade="all, delete-orphan")
