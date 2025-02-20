@@ -12,3 +12,4 @@ python-jose
 pandas
 numpy
 matplotlib
+surprise

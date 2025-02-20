@@ -22,23 +22,8 @@ CREATE TABLE IF NOT EXISTS users (
     diet TEXT,
     gender BOOLEAN
 );
-CREATE TABLE IF NOT EXISTS users (
-    user_id SERIAL PRIMARY KEY,
-    username VARCHAR(255) UNIQUE,
-    password_hash TEXT,
-    email VARCHAR(255) UNIQUE,
-    veg_non BOOLEAN,
-    height FLOAT,
-    weight FLOAT,
-    bmi FLOAT GENERATED ALWAYS AS (weight / ((height / 100) * (height / 100))) STORED,
-    nutrient VARCHAR(100),
-    disease TEXT,
-    diet TEXT,
-    gender BOOLEAN
-);
 
 -- ✅ Ensure sequence starts at MAX(user_id) + 1
-SELECT setval('users_user_id_seq', COALESCE((SELECT MAX(user_id) FROM users), 1), FALSE);
 
 -- Recreate Meals Table
 CREATE TABLE IF NOT EXISTS meals (

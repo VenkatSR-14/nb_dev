@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from app.repositories.user_repository import insert_user, get_user_by_username, update_user_details
 from app.models.user import User
 import bcrypt
+from app.services.llm_service import LLMService
 
 # Function to hash password
 def hash_password(password: str) -> str:
@@ -26,11 +27,11 @@ def create_user(
         return {"error": "Username or Email already exists"}
 
 
-    # Hash the password
+    # ✅ Hash password only if user doesn't exist
     hashed_password = hash_password(password)
 
-    # Call repository to insert user
     return insert_user(db, username, hashed_password, email, veg_non, height, weight, disease, diet, gender)
+
 
 # Function to update user details
 def update_user(db: Session, user_id: int, height: float, weight: float, disease: str, diet: str):

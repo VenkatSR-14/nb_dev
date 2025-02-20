@@ -1,8 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, Float, Text
-from app.core.database import Base
-
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey
 from app.core.database import Base
 
 class User(Base):
@@ -15,10 +12,12 @@ class User(Base):
     veg_non = Column(Boolean, nullable=False)
     height = Column(Float, nullable=False)
     weight = Column(Float, nullable=False)
-    disease = Column(String, nullable=True)
-    diet = Column(String, nullable=True)
+    disease = Column(Text, nullable=True)  # Changed to Text to match schema
+    diet = Column(Text, nullable=True)     # Changed to Text to match schema
     gender = Column(Boolean, nullable=False)
 
-    # ✅ Fix: Add the "mapping" relationship
+    # ✅ Relationship with UserMapping
     mapping = relationship("UserMapping", back_populates="user", uselist=False)
 
+    # ✅ Relationship with RecentActivity (UserActivity table)
+    recent_activities = relationship("RecentActivity", back_populates="user", cascade="all, delete-orphan")

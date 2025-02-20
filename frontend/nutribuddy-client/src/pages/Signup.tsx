@@ -31,7 +31,7 @@ const Signup = () => {
     e.preventDefault();
 
     try {
-      axios.post(`${API_BASE_URL}/api/v1/auth/signup`, {
+      await axios.post(`${API_BASE_URL}/api/v1/users/signup`, {
         username,
         password,
         email,
@@ -43,7 +43,7 @@ const Signup = () => {
       });
 
       alert("Signup Successful!");
-      navigate("/"); // ✅ Redirect after successful signup
+      navigate("/"); 
     } catch (error) {
       const axiosError = error as AxiosError;
       console.error("Signup failed", axiosError);
@@ -53,7 +53,7 @@ const Signup = () => {
           : "Signup failed. Please try again."
       );
     }
-  };
+};
 
   return (
     <Container component="main" maxWidth="xs">
@@ -96,6 +96,7 @@ const Signup = () => {
               onChange={(e) => setGender(e.target.value as string)}
               required
             >
+              <MenuItem value="" disabled>Select Gender</MenuItem> {/* ✅ Default placeholder */}
               <MenuItem value="0">Male</MenuItem>
               <MenuItem value="1">Female</MenuItem>
             </Select>
@@ -108,6 +109,7 @@ const Signup = () => {
               onChange={(e) => setVegNon(e.target.value as string)}
               required
             >
+              <MenuItem value="" disabled>Select Diet Preference</MenuItem> {/* ✅ Default placeholder */}
               <MenuItem value="0">Vegetarian</MenuItem>
               <MenuItem value="1">Non-Vegetarian</MenuItem>
             </Select>
