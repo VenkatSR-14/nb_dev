@@ -1,57 +1,48 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  Menu,
-  MenuItem,
-  Container,
-  Paper,
-} from "@mui/material";
+import axios from "axios";
+import { Container, Paper, Typography, CircularProgress } from "@mui/material";
+import Navbar from "../components/Navbar";
+import { isAuthenticated } from "../utils/auth";  // ✅ Import authentication check
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://backend:8000";
 
-  const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+  // ✅ If not authenticated, redirect to login
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/");
+    }
+  }, [navigate]);
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      const userId = localStorage.getItem("user_id");
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/");
-  };
+      if (!userId || userId === "undefined") {  // ✅ Check for undefined user_id
+        console.error("No user ID found in localStorage");
+        return;
+      }
+
+      try {
+        const response = await axios.get(`${API_BASE_URL}/api/v1/recommender/recommend/${userId}`);
+        setRecommendations(response.data.recommendations);
+      } catch (error) {
+        console.error("Error fetching recommendations", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecommendations();
+  }, []);
 
   return (
     <div style={{ backgroundColor: "#f5f5f5", minHeight: "100vh" }}>
-      {/* Navbar */}
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" style={{ flexGrow: 1 }}>
-            Dashboard
-          </Typography>
-          <Button color="inherit" onClick={handleMenuClick}>
-            Account
-          </Button>
-          <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-            <MenuItem onClick={() => { navigate("/update-settings"); handleMenuClose(); }}>
-              Update Settings
-            </MenuItem>
-            <MenuItem onClick={() => { navigate("/"); handleMenuClose(); }}>
-              Home Page
-            </MenuItem>
-            <MenuItem onClick={() => { handleLogout(); handleMenuClose(); }}>
-              Sign Out
-            </MenuItem>
-          </Menu>
-        </Toolbar>
-      </AppBar>
+      <Navbar />  {/* ✅ Use the shared Navbar */}
 
       {/* Main Content */}
       <Container>
@@ -62,6 +53,24 @@ const Dashboard = () => {
           <Typography variant="body1" color="textSecondary" style={{ marginTop: "10px" }}>
             Here you can update your settings and manage your account.
           </Typography>
+
+          {/* Recommendations Section */}
+          <div style={{ marginTop: "30px", textAlign: "left" }}>
+            <Typography variant="h6">Your Recommendations:</Typography>
+            {loading ? (
+              <CircularProgress style={{ marginTop: "10px" }} />
+            ) : recommendations.length > 0 ? (
+              <ul>
+                {recommendations.map((rec, index) => (
+                  <li key={index}>{rec.name}</li>
+                ))}
+              </ul>
+            ) : (
+              <Typography variant="body2" color="textSecondary">
+                No recommendations available.
+              </Typography>
+            )}
+          </div>
         </Paper>
       </Container>
     </div>

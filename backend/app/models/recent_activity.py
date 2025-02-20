@@ -2,6 +2,8 @@ from sqlalchemy import Column, Integer, Boolean, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 from datetime import datetime
+from app.models.exercise import Exercise  # ✅ Import Exercise model
+
 
 class RecentActivity(Base):
     """

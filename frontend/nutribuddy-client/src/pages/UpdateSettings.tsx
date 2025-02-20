@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { Container, TextField, Button, Typography, Paper } from "@mui/material";
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://backend:8000";
 const UpdateSettings = () => {
     const [history, setHistory] = useState("");
     const [height, setHeight] = useState("");
@@ -12,7 +13,7 @@ const UpdateSettings = () => {
         const token = localStorage.getItem("token");
 
         try {
-            await axios.put("http://localhost:8000/auth/update", {
+            await axios.put("http://localhost:8000/api/v1/users/update", {
                 history,
                 height: Number(height),
                 weight: Number(weight),

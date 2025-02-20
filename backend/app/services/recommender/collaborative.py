@@ -47,24 +47,33 @@ def recommend_item_based(db: Session, user_id: int, top_n=5):
     """
     Recommend meals using item-based collaborative filtering.
     """
-    # Load user ratings from the database
-    meal_ratings = pd.DataFrame(db.query(RecentActivity).all(), columns=["user_id", "meal_id", "rated"])
+    # ✅ Fetch user activity from the database
+    activities_query = db.query(RecentActivity).all()
+    
+    # ✅ Convert ORM objects into a DataFrame properly
+    meal_ratings = pd.DataFrame(
+        [{"user_id": activity.user_id, "meal_id": activity.meal_id, "rated": activity.rated} for activity in activities_query]
+    )
+
+    if meal_ratings.empty:
+        return {"error": "No recent activity found."}
 
     if user_id not in meal_ratings["user_id"].unique():
         return {"error": "User not found"}
 
-    # Create a user-item matrix
+    # ✅ Create a user-item matrix
     user_ratings = meal_ratings.pivot(index="user_id", columns="meal_id", values="rated").fillna(0)
 
-    # Compute item similarity (meal-to-meal similarity)
+    # ✅ Compute item similarity (meal-to-meal similarity)
     item_similarity = user_ratings.T.corr().fillna(0)
 
-    # Get meals the user has interacted with
+    # ✅ Get meals the user has interacted with
     user_meals = meal_ratings[meal_ratings["user_id"] == user_id]["meal_id"].values
 
     recommended_meals = set()
     for meal in user_meals:
-        similar_meals = item_similarity[meal].sort_values(ascending=False)[1:top_n+1].index
-        recommended_meals.update(similar_meals)
+        if meal in item_similarity:
+            similar_meals = item_similarity[meal].sort_values(ascending=False)[1:top_n+1].index
+            recommended_meals.update(similar_meals)
 
     return list(recommended_meals)[:top_n]

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppBar, Toolbar, Typography, Button, Menu, MenuItem } from "@mui/material";
-import { isAuthenticated, logout } from "../utils/auth";
+import { isAuthenticated, logout } from "../utils/auth";  // ✅ Import auth functions
 
 const Navbar = () => {
   const navigate = useNavigate();

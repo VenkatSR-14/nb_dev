@@ -56,11 +56,15 @@ def login_user(db: Session, username: str, password: str):
             recommendation_reason="Generated on login"
         )
         db.add(db_rec)
-    
+
     db.commit()
 
-    return {"message": "Login successful", "recommendations": recommendations}
-    
+    # ✅ Return `user_id` along with success message
+    return {
+        "message": "Login successful",
+        "user_id": user.user_id,  # ✅ Include user_id in the response
+        "access_token": "dummy_token"  # Replace with actual JWT if implemented
+    }
 
 
 # Function to update user details

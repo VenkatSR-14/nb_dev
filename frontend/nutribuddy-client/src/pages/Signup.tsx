@@ -15,7 +15,6 @@ import {
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://backend:8000";
 
-
 const Signup = () => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -31,7 +30,7 @@ const Signup = () => {
     e.preventDefault();
 
     try {
-      await axios.post(`${API_BASE_URL}/api/v1/users/signup`, {
+      const response = await axios.post(`${API_BASE_URL}/api/v1/users/signup`, {
         username,
         password,
         email,
@@ -42,8 +41,18 @@ const Signup = () => {
         gender: gender === "1",   // ✅ Converts "1" to true, "0" to false
       });
 
-      alert("Signup Successful!");
-      navigate("/"); 
+      // ✅ Automatically log in after successful signup
+      const loginResponse = await axios.post(`${API_BASE_URL}/api/v1/users/login`, {
+        username,
+        password,
+      });
+
+      // ✅ Store token & user ID in localStorage
+      localStorage.setItem("token", loginResponse.data.access_token);
+      localStorage.setItem("user_id", loginResponse.data.user_id);
+
+      // ✅ Redirect to Dashboard
+      navigate("/dashboard");
     } catch (error) {
       const axiosError = error as AxiosError;
       console.error("Signup failed", axiosError);
@@ -53,7 +62,7 @@ const Signup = () => {
           : "Signup failed. Please try again."
       );
     }
-};
+  };
 
   return (
     <Container component="main" maxWidth="xs">
