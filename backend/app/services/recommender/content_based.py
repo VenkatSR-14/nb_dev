@@ -5,7 +5,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from app.models.user import User  # ✅ Import User model
 from app.models.meal import Meal  # ✅ Import Meal model
 
-def recommend_content_based(db: Session, user_id: int, top_n=5):
+def recommend_content_based(db: Session, user_id: int, top_n=10):
     """
     Recommend meals based on a user's preferences using TF-IDF content-based filtering.
     """
