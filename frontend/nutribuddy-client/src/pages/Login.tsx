@@ -1,12 +1,14 @@
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
-import { Container, TextField, Button, Typography, Paper, Box } from "@mui/material";
+import { Container, TextField, Button, Typography, Paper, Box, CircularProgress } from "@mui/material";
 import { isAuthenticated } from "../utils/auth";  // ✅ Import authentication check
 
 const Login = () => {
   const [userName, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || "http://backend:8000";
@@ -18,17 +20,30 @@ const Login = () => {
         username: userName,  // ✅ Ensure correct field name
         password,
       });
-
+  
       // ✅ Store token in localStorage
       localStorage.setItem("token", response.data.access_token);
-
+      localStorage.setItem("username", userName);
+  
       // ✅ Store user ID to fetch recommendations later (Fix applied)
       if (response.data.user_id) {
         localStorage.setItem("user_id", response.data.user_id);
+        
+        // Add the recommendation refresh code here
+        console.log("Refreshing recommendations for user:", response.data.user_id);
+        try {
+          const refreshResponse = await axios.post(
+            `${API_BASE_URL}/api/v1/recommender/refresh-recommendations/${response.data.user_id}`
+          );
+          console.log("Refresh response:", refreshResponse.data);
+        } catch (error) {
+          console.error("Failed to refresh recommendations:", error);
+        }
+        
       } else {
         console.error("User ID missing from response");
       }
-
+  
       // ✅ Redirect to Dashboard after login
       navigate("/dashboard");
     } catch (error) {
@@ -36,9 +51,10 @@ const Login = () => {
     }
   };
 
-  // ✅ If already authenticated, redirect to Dashboard
+  // If already authenticated, redirect to Dashboard
   if (isAuthenticated()) {
     navigate("/dashboard");
+    return null;
   }
 
   return (
@@ -47,12 +63,18 @@ const Login = () => {
         <Typography variant="h5" align="center">
           Login
         </Typography>
+        {error && (
+          <Typography color="error" align="center" style={{ marginTop: "10px" }}>
+            {error}
+          </Typography>
+        )}
         <form onSubmit={handleSubmit}>
           <TextField
             fullWidth
             label="Username"
             margin="normal"
             onChange={(e) => setUsername(e.target.value)}
+            disabled={loading}
             required
           />
           <TextField
@@ -61,6 +83,7 @@ const Login = () => {
             type="password"
             margin="normal"
             onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
             required
           />
           <Button
@@ -69,8 +92,9 @@ const Login = () => {
             variant="contained"
             color="primary"
             style={{ marginTop: "10px" }}
+            disabled={loading}
           >
-            Login
+            {loading ? <CircularProgress size={24} color="inherit" /> : "Login"}
           </Button>
         </form>
 

@@ -23,7 +23,7 @@ class LoginRequest(BaseModel):
 
 @router.post("/signup")
 async def signup(user: SignupRequest, db: Session = Depends(get_db)):
-    print("Here!")
+
     print("Received Data:", user.dict())  # ✅ Debugging
     
     db_user = get_user_by_username(db, user.username)
@@ -32,12 +32,15 @@ async def signup(user: SignupRequest, db: Session = Depends(get_db)):
     
     # ✅ Call LLM to parse disease and recommend diet
     disease_diet_data = LLMService.process_disease_history(user.disease)
-
+    
     parsed_diseases = ", ".join(disease_diet_data["diseases"])
     recommended_diet = disease_diet_data["recommended_diet"]
 
     print("Parsed Diseases:", parsed_diseases)
     print("Recommended Diet:", recommended_diet)
+    
+    if not parsed_diseases:
+        raise HTTPException(status_code=400, detail="No diseases detected. The input may be invalid or out of scope for the current system.")
 
     # ✅ Insert into database with LLM-processed disease & diet
     result = create_user(

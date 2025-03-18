@@ -62,8 +62,32 @@ def hybrid_recommendation(db: Session, user_id, top_n=15):
                     meal_priority[meal_id] = priority
                     recommendations.append(rec)
 
+    # Add this code right here
+    # Boost meals that are popular among users with the same disease
+    for meal_id, count in similar_liked_meal_counts.most_common(5):  # Top 5 most popular meals
+        if meal_id in meal_priority:
+            meal_priority[meal_id] += 25  # Give high priority to disease-specific popular meals
+
     # ✅ Sort recommendations by popularity & personal preference
     recommendations.sort(key=lambda r: meal_priority.get(r["meal_id"], 0), reverse=True)
+
+    user_liked_meals = db.query(RecentActivity).filter_by(user_id=user_id, liked=True).all()
+
+# After your initial recommendations are sorted
+# Add user's liked/purchased meals to the top if not already included
+    user_liked_meal_ids = [activity.meal_id for activity in user_liked_meals]
+    for meal_id in user_liked_meal_ids:
+        if meal_id not in [r["meal_id"] for r in recommendations]:
+            meal = db.query(Meal).filter(Meal.meal_id == meal_id).first()
+            if meal:
+                recommendations.insert(0, {
+                    "meal_id": meal.meal_id,
+                    "name": meal.name,
+                    "nutrient": meal.nutrient,
+                    "disease": meal.disease,
+                    "diet": meal.diet,
+                    "source": "previously-liked"
+                })
 
     # ✅ Ensure at least 10 meals are in recommendations
     if len(recommendations) < 10:
@@ -71,14 +95,5 @@ def hybrid_recommendation(db: Session, user_id, top_n=15):
         additional_meals = db.query(Meal).filter(
             Meal.meal_id.notin_([r["meal_id"] for r in recommendations])
         ).limit(missing_count).all()
-
-        for meal in additional_meals:
-            recommendations.append({
-                "meal_id": meal.meal_id,
-                "name": meal.name,
-                "nutrient": meal.nutrient,
-                "disease": meal.disease,
-                "diet": meal.diet,
-            })
 
     return recommendations
