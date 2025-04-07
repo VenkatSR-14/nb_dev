@@ -69,7 +69,9 @@ services:
       - backend
     volumes:
       - ./frontend/nutribuddy-client:/app
-      # - /app/node_modules  # ❌ Remove if causing errors
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    command: ["npm", "start"]
 
 volumes:
   postgres_data:

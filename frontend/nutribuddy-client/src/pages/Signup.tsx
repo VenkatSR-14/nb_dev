@@ -139,9 +139,16 @@ const Signup = () => {
       // ✅ Store token & user ID in localStorage
       localStorage.setItem("token", loginResponse.data.access_token);
       localStorage.setItem("user_id", loginResponse.data.user_id);
+      // Store token & user ID in localStorage
+      localStorage.setItem("token", loginResponse.data.access_token);
+      localStorage.setItem("user_id", loginResponse.data.user_id);
+      localStorage.setItem("username", username);
+      localStorage.setItem("userHeight", height);
+      localStorage.setItem("userWeight", weight);
+      localStorage.setItem("userDietPreference", vegNon === "0" ? "vegetarian" : "non-vegetarian");
 
       // ✅ Redirect to Dashboard
-      navigate("/dashboard");
+      window.location.href = "/dashboard";
     } catch (error) {
       const axiosError = error as AxiosError;
       console.error("Signup failed", axiosError);

@@ -18,3 +18,5 @@ class Recommendation(Base):
 
     # ✅ Relationships
     user = relationship("User", back_populates="recommendations")
+
+

@@ -8,9 +8,24 @@ from app.models.user import User
 from app.models.recommendations import Recommendation  # Fixed model name
 from app.models.meal import Meal
 from datetime import datetime, timedelta
-
+import pandas as pd
+import numpy as np
 router = APIRouter()
 
+
+class ExerciseRecommendation(BaseModel):
+    name: str
+    type: str
+    duration: int
+    calories_burned: float
+    description: str
+    intensity: str
+    bmi_range: str
+
+class ExerciseRequest(BaseModel):
+    height: float
+    weight: float
+    
 @router.get("/recommend/{user_id}")
 async def recommend_meals(user_id: int, top_n: int = 10, refresh: bool = False, db: Session = Depends(get_db)):
     """
@@ -36,6 +51,7 @@ async def recommend_meals(user_id: int, top_n: int = 10, refresh: bool = False, 
             recommendations_list = []
             for rec in stored_recommendations:
                 meal = db.query(Meal).filter(Meal.meal_id == rec.meal_id).first()
+                print(meal.veg_non)
                 if meal:
                     recommendations_list.append({
                         "meal_id": meal.meal_id,
@@ -43,7 +59,7 @@ async def recommend_meals(user_id: int, top_n: int = 10, refresh: bool = False, 
                         "nutrient": meal.nutrient,
                         "disease": meal.disease,
                         "diet": meal.diet,
-                        "is_vegetarian": "vegetarian" in meal.diet.lower() if meal.diet else False,
+                        "is_vegetarian": True if meal.veg_non == 0 else False,
                         "reason": rec.recommendation_reason
                     })
             
@@ -137,6 +153,108 @@ async def interact_with_meal(
 
     return {"message": f"Meal {request.meal_id} {request.action}d successfully!", "action": request.action}
 
+@router.post("/exercise/{user_id}")
+async def recommend_exercises(user_id: int, exercise_request: ExerciseRequest, db: Session = Depends(get_db)):
+    """
+    Recommend exercises based on user's physical attributes using machine learning.
+    """
+    try:
+        height = exercise_request.height
+        weight = exercise_request.weight
+        height_m = height / 100
+        bmi = weight / (height_m ** 2)
+
+        if bmi < 18.5:
+            bmi_category = "Underweight"
+        elif 18.5 <= bmi < 25:
+            bmi_category = "Normal weight"
+        elif 25 <= bmi < 30:
+            bmi_category = "Overweight"
+        else:
+            bmi_category = "Obese"
+
+        # Load exercise data using pd.read_csv
+        try:
+            exercise_df = pd.read_csv("/app/data/cleaned/cleaned_exercise.csv")
+        except FileNotFoundError:
+            raise HTTPException(status_code=500, detail="Exercise data file not found")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error loading exercise data: {str(e)}")
+
+
+        from sklearn.ensemble import RandomForestRegressor
+        from sklearn.preprocessing import StandardScaler
+
+        # Train model - Correct the column names to match the exercise dataset
+        X_train = exercise_df[["bmi"]]
+        y_train = exercise_df["exercise_intensity"]
+
+        scaler = StandardScaler()
+        X_train_scaled = scaler.fit_transform(X_train)
+
+        model = RandomForestRegressor(n_estimators=100, random_state=42)
+        model.fit(X_train_scaled, y_train)
+
+        user_features = np.array([[bmi]])
+        user_features_scaled = scaler.transform(user_features)
+        predicted_intensity = model.predict(user_features_scaled)[0]
+
+        feature_importance = model.feature_importances_
+
+        intensity_range = (max(0, predicted_intensity - 1), min(10, predicted_intensity + 1))
+
+        # Filter exercises based on the predicted intensity range
+        filtered_exercises = exercise_df[
+            exercise_df['exercise_intensity'].between(intensity_range[0], intensity_range[1])
+        ]
+
+        if len(filtered_exercises) < 5:
+            intensity_range = (max(0, predicted_intensity - 2), min(10, predicted_intensity + 2))
+            filtered_exercises = exercise_df[
+                exercise_df['exercise_intensity'].between(intensity_range[0], intensity_range[1])
+            ]
+
+        exercise_types = filtered_exercises['exercise'].unique()
+        recommended_exercises = pd.DataFrame()
+
+        for exercise_type in exercise_types:
+            type_exercises = filtered_exercises[filtered_exercises['exercise'] == exercise_type]
+            if not type_exercises.empty:
+                type_exercises['intensity_diff'] = abs(type_exercises['exercise_intensity'] - predicted_intensity)
+                type_exercises = type_exercises.sort_values('intensity_diff').head(2)
+                recommended_exercises = pd.concat([recommended_exercises, type_exercises])
+
+        recommended_exercises = recommended_exercises.head(5)
+
+        exercise_list = []
+        for _, exercise in recommended_exercises.iterrows():
+            exercise_info = {
+                "name": exercise['exercise'],
+                "type": "Not available",
+                "duration": int(exercise['duration']),
+                "calories_burned": float(exercise['calories_burn']),
+                "description": "Not available",
+                "intensity": str(exercise['exercise_intensity']),
+                "bmi_range": bmi_category,
+                "match_score": float(100 - (exercise['intensity_diff'] * 10)) if 'intensity_diff' in exercise else 95.0
+            }
+            exercise_list.append(exercise_info)
+
+        exercise_recommendations = [ExerciseRecommendation(**exercise) for exercise in exercise_list]
+
+        return {
+            "bmi": bmi,
+            "bmi_category": bmi_category,
+            "predicted_intensity": float(predicted_intensity),
+            "feature_importance": {
+                "bmi": float(feature_importance[0])
+            },
+            "recommendations": exercise_recommendations
+        }
+    except Exception as e:
+        print(f"Error recommending exercises: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error recommending exercises: {str(e)}")
+    
 def store_recommendations(db: Session, user_id: int, recommendations: list):
     """
     Store recommendations in the database
@@ -210,3 +328,46 @@ async def refresh_user_recommendations(
         return {"message": "Recommendations refreshed successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to refresh recommendations: {str(e)}")
+
+@router.post("/rerun-recommendations/{user_id}")
+async def rerun_recommendations(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Reruns both exercise and meal recommendations for the user after profile updates.
+    """
+    try:
+        # Fetch user data
+        user = db.query(User).filter(User.user_id == user_id).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        # Rerun meal recommendations
+        meal_recommendations = hybrid_recommendation(db, user_id, top_n=10)
+        if isinstance(meal_recommendations, dict) and "error" in meal_recommendations:
+            raise HTTPException(status_code=500, detail=meal_recommendations["error"])
+
+        # Store meal recommendations in the database
+        store_recommendations(db, user_id, meal_recommendations)
+
+        # Create exercise request with updated user data
+        exercise_request = ExerciseRequest(
+            height=user.height,
+            weight=user.weight
+        )
+        
+        # Rerun exercise recommendations
+        exercise_recommendations = await recommend_exercises(
+            user_id=user_id, 
+            exercise_request=exercise_request, 
+            db=db
+        )
+
+        return {
+            "message": "Recommendations refreshed successfully!",
+            "meal_recommendations": meal_recommendations,
+            "exercise_recommendations": exercise_recommendations["recommendations"]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to rerun recommendations: {str(e)}")
